@@ -60,7 +60,7 @@ public class Communication extends Observable implements Runnable {
         Command currentCommand = getCommandFromEnum(splittedCommand[0]);
 
         switch (currentCommand){
-            case EHLO: sendMessage("250 bienvenue");
+            case EHLO: sendMessage("250 bienvenue\n");
             case MAIL:
                 break;
             case RCPT:

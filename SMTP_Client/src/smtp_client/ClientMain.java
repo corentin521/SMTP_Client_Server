@@ -3,9 +3,6 @@ package smtp_client;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -32,10 +29,9 @@ public class ClientMain extends Application implements Observer {
     // UI
     private Stage primaryStage;
     private Scene loginScene;
-    private Scene mailboxScene;
+    private Scene mailFormScene;
     private TextField userNameTextField;
     private Text errorField;
-    private ListView<String> listView;
     private TextField fromTextField;
     private TextField dateTextField;
     private TextField subjectTextField;
@@ -119,49 +115,34 @@ public class ClientMain extends Application implements Observer {
         mailboxGrid.setVgap(10);
         mailboxGrid.setPadding(new Insets(10, 10, 10, 10));
 
-        Label IPAddresstLabel = new Label();
-        IPAddresstLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 12));
-        mailboxGrid.add(IPAddresstLabel, 0, 0);
-
-        Button refreshButton = new Button("Actualiser");
-        refreshButton.setFont(Font.font("Tahoma", FontWeight.NORMAL, 13));
-        mailboxGrid.add(refreshButton, 0, 0, 6, 1);
-
-
         Button logOutButton = new Button("Se déconnecter");
         logOutButton.setFont(Font.font("Tahoma", FontWeight.NORMAL, 13));
-        mailboxGrid.add(logOutButton, 8, 0, 6, 1);
+        mailboxGrid.add(logOutButton, 38, 0, 8, 1);
         
         Label fromLabel = new Label("De :");
-        mailboxGrid.add(fromLabel, 11, 2);
+        mailboxGrid.add(fromLabel, 1, 2);
         fromTextField = new TextField();
-        mailboxGrid.add(fromTextField, 12, 2, 34, 1);
+        fromTextField.setDisable(true);
+        mailboxGrid.add(fromTextField, 2, 2, 45, 1);
         
         Label dateLabel = new Label("Date :");
-        mailboxGrid.add(dateLabel, 11, 3);
+        mailboxGrid.add(dateLabel, 1, 3);
         dateTextField = new TextField();
-        mailboxGrid.add(dateTextField, 12, 3, 34, 1);
+        mailboxGrid.add(dateTextField, 2, 3, 45, 1);
         
         Label subjectLabel = new Label("Objet :");
-        mailboxGrid.add(subjectLabel, 11, 4);
+        mailboxGrid.add(subjectLabel, 1, 4);
         subjectTextField = new TextField();
-        mailboxGrid.add(subjectTextField, 12, 4, 34, 1);
+        mailboxGrid.add(subjectTextField, 2, 4, 45, 1);
 
         Label contentLabel = new Label("Contenu :");
-        mailboxGrid.add(contentLabel, 11, 5);
+        mailboxGrid.add(contentLabel, 1, 5);
         contentTextField = new TextArea();
-        mailboxGrid.add(contentTextField, 11, 6, 35, 18);
+        mailboxGrid.add(contentTextField, 1, 6, 45, 18);
 
-        listView = new ListView<>();
-        listView.setPrefSize(200, 200);
-        listView.getSelectionModel().selectedItemProperty().addListener(
-                (ObservableValue<? extends String> ov, String old_val, String new_val) -> {
-                    //mailClicked(new_val);
-                });
-        
-        StackPane root = new StackPane();
-        root.getChildren().add(listView);
-        mailboxGrid.add(root, 0, 2, 10, 25);
+        Button sendMailButton = new Button("Envoyer");
+        sendMailButton.setFont(Font.font("Tahoma", FontWeight.NORMAL, 13));
+        mailboxGrid.add(sendMailButton, 22, 25, 8, 1);
 
         logOutButton.setOnAction(e -> {
             userNameTextField.setText("");
@@ -169,10 +150,11 @@ public class ClientMain extends Application implements Observer {
             client.quit();
         });
 
-        refreshButton.setOnAction(e -> {
+        logOutButton.setOnAction(e -> {
+           //TODO Envoyer le mail
         });
 
-        mailboxScene = new Scene(mailboxGrid, 650, 450);
+        mailFormScene = new Scene(mailboxGrid, 650, 450);
     }
 
     private void createClient() {
@@ -206,7 +188,8 @@ public class ClientMain extends Application implements Observer {
 
            switch (response){
                 case LOGGED:
-                    setCurrentScene(mailboxScene);
+                    setCurrentScene(mailFormScene);
+                    fromTextField.setText(userName);
                     break;
                 case UNKNOWN_USER:
                     errorField.setText("Utilisateur inconnu.");
@@ -216,42 +199,9 @@ public class ClientMain extends Application implements Observer {
                     break;
                case LOGGING_OUT:
                    setCurrentScene(loginScene);
-                   listView.getSelectionModel().clearSelection();
-                   //listView.getFocusModel().isFocused()
                    client = null;
                    break;
            }
-       }
-       else if (arg instanceof Mail) {
-            Mail mail = (Mail) arg;
-            
-            client.saveClientMail(userName, mail);
-            
-            fromTextField.setText(mail.getFrom());
-            fromTextField.setDisable(false);
-            dateTextField.setText(mail.getDate());
-            dateTextField.setDisable(false);
-            subjectTextField.setText(mail.getSubject());
-            subjectTextField.setDisable(false);
-            contentTextField.setText(mail.getContent());
-            contentTextField.setDisable(false);
-       }
-       else if (arg instanceof ObservableSet) {
-           Platform.runLater(() -> {
-               ObservableSet<String> mailSet = (ObservableSet<String>) arg;
-                    listView.setItems(FXCollections.observableArrayList(mailSet));
-               }
-           );
-
-       }
-       else
-       {
-           ObservableList<String> data = FXCollections.observableArrayList();
-           for(int i = 1; i <= Integer.valueOf((String)arg);i++)
-           {
-               data.add("Mail" + String.valueOf(i));
-           }
-           listView.setItems(data);
        }
    }
 
