@@ -18,6 +18,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -33,9 +34,13 @@ public class ClientMain extends Application implements Observer {
     private TextField userNameTextField;
     private Text errorField;
     private TextField fromTextField;
-    private TextField dateTextField;
+    private TextField toTextField;
     private TextField subjectTextField;
     private TextArea contentTextField;
+
+    private static final int FREE_PORT = 2500;
+    private static final int HOTMAIL_PORT = 2501;
+    private static final int GMAIL_PORT = 2502;
 
     public static void main(String args[]){
         launch(args);
@@ -62,6 +67,12 @@ public class ClientMain extends Application implements Observer {
         primaryStage.show();
     }
 
+
+
+
+
+
+
     private void createLoginInterface() {
         GridPane loginGrid = new GridPane();
         loginGrid.setAlignment(Pos.CENTER);
@@ -73,7 +84,7 @@ public class ClientMain extends Application implements Observer {
         loginSceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         loginGrid.add(loginSceneTitle, 0, 0, 2, 1);
 
-        Label userNameLabel = new Label("Nom :");
+        Label userNameLabel = new Label("Email :");
         loginGrid.add(userNameLabel, 0, 1);
 
         userNameTextField = new TextField();
@@ -93,10 +104,7 @@ public class ClientMain extends Application implements Observer {
             if (userNameTextField.getText().equals(""))
                 errorField.setText("Le nom d'utilisateur doit être renseigné.");
             else {
-                if(client == null)
-                    createClient();
-                userName = userNameTextField.getText();
-                login();
+                connectClient();
             }
         });
 
@@ -108,6 +116,55 @@ public class ClientMain extends Application implements Observer {
 
         loginScene = new Scene(loginGrid, 500, 450);
     }
+
+    private void connectClient() {
+        if (client != null) {
+            client.stop();
+            client = null;
+        }
+
+        // Creation du client et connexion au serveur du domaine voulu
+        Thread clientThread;
+        try {
+            String emailDomain = userNameTextField.getText().split("@")[1];
+            int portToConnect = getPortFromEmailDomain(emailDomain);
+            userName = userNameTextField.getText();
+
+            if (portToConnect != 0) {
+                client = new Client("localhost", portToConnect);
+                client.addObserver(ClientMain.this);
+                clientThread = new Thread(client);
+                clientThread.start();
+            }
+            else {
+                errorField.setText("Aucun domaine de ce nom.");
+            }
+        }
+        catch (Exception e) {
+            if(e instanceof ConnectException)
+                errorField.setText("Une erreur réseau est survenue.");
+        }
+    }
+
+    private int getPortFromEmailDomain(String email) {
+        switch (email) {
+            case "free.fr":
+                return FREE_PORT;
+            case "hotmail.fr":
+                return HOTMAIL_PORT;
+            case "gmail.com":
+                return GMAIL_PORT;
+            default:
+                return 0;
+        }
+    }
+
+
+
+
+
+
+
 
     private void createMailboxInterface(){
         GridPane mailboxGrid = new GridPane();
@@ -125,10 +182,10 @@ public class ClientMain extends Application implements Observer {
         fromTextField.setDisable(true);
         mailboxGrid.add(fromTextField, 2, 2, 45, 1);
         
-        Label dateLabel = new Label("Date :");
-        mailboxGrid.add(dateLabel, 1, 3);
-        dateTextField = new TextField();
-        mailboxGrid.add(dateTextField, 2, 3, 45, 1);
+        Label toLabel = new Label("A :");
+        mailboxGrid.add(toLabel, 1, 3);
+        toTextField = new TextField();
+        mailboxGrid.add(toTextField, 2, 3, 45, 1);
         
         Label subjectLabel = new Label("Objet :");
         mailboxGrid.add(subjectLabel, 1, 4);
@@ -150,36 +207,18 @@ public class ClientMain extends Application implements Observer {
             client.quit();
         });
 
-        logOutButton.setOnAction(e -> {
-           //TODO Envoyer le mail
+        sendMailButton.setOnAction(e -> {
+           client.sendMail(userNameTextField.toString(), toTextField.toString(), subjectTextField.toString(), contentTextField.toString());
         });
 
         mailFormScene = new Scene(mailboxGrid, 650, 450);
     }
 
-    private void createClient() {
-        Thread clientThread;
-        try{
-            client = new Client("localhost", 1230);
-            client.addObserver(ClientMain.this);
-            clientThread = new Thread(client);
-            clientThread.start();
-        }
-        catch (Exception e) {
-            if(e instanceof ConnectException)
-                errorField.setText("Une erreur réseau est survenue.");
-        }
-    }
 
-    private void login() {
-        try{
-            client.validateLoginDetails(userName);
-        }
-        catch (Exception e) {
-            if(e instanceof ConnectException)
-                errorField.setText("Une erreur est survenue.");
-        }
-    }
+
+
+
+
 
    @Override
    public void update(Observable o, Object arg) {

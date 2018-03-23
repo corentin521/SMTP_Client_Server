@@ -9,29 +9,20 @@ import java.util.Observer;
 
 public class Server extends Observable implements Observer {
 
-    private static Server instance;
-    private int port;
-    private ServerSocket serverSocket;
-    private boolean isRunning = true;
+    public static Server instance;
 
+    private static final int FREE_PORT = 2500;
+    private static final int HOTMAIL_PORT = 2501;
+    private static final int GMAIL_PORT = 2502;
 
     public Server() {
-        this(110);
+        launchEveryDomains();
     }
 
-    public Server(int port) {
-        this.port = port;
-
-        try {
-            serverSocket = new ServerSocket(port);
-
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        launchServer();
+    private void launchEveryDomains() {
+        ServeurDomaine.getInstance(FREE_PORT);
+        ServeurDomaine.getInstance(HOTMAIL_PORT);
+        ServeurDomaine.getInstance(GMAIL_PORT);
     }
 
     public static Server getInstance() {
@@ -41,50 +32,11 @@ public class Server extends Observable implements Observer {
         return instance;
     }
 
-    public void setPort(int port) {
-        this.port = port;
-        try {
-            this.serverSocket.close();
-            this.serverSocket = new ServerSocket(port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void launchServer() {
-        Thread t = new Thread(() -> {
-            while (isRunning) {
-                try {
-                    Socket client =  serverSocket.accept();
-
-                    System.out.println("[Server] Connexion client reçue !");
-                    Communication communication = new Communication(client);
-                    communication.addObserver(Server.this);
-                    new Thread(communication).start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                serverSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                serverSocket = null;
-            }
-        });
-
-        t.start();
-    }
-
-    public void close() {
-        isRunning = false;
-    }
-
     @Override
     public void update(Observable o, Object arg) {
         if (arg instanceof String) {
-            getInstance().setChanged();
-            getInstance().notifyObservers(arg);
+            setChanged();
+            notifyObservers(arg);
         }
     }
 }

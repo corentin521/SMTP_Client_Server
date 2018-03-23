@@ -4,25 +4,28 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Observable;
 
-import static smtp_client.Enums.Response.LOGGED;
-
-public class Client extends Observable implements Runnable {
+public class ClientDomaine extends Observable implements Runnable {
 
     private enum State {
-        WAITING_FOR_TCP_CONNECTION,
-        CONNECTED
+        CONNECTED,
+        IDENTIFIED,
+        WAITING_FOR_RECIPIENT,
+        VALIDATED_RECIPIENT,
+        SENDING,
+        SENDING_DATA
+
     }
 
     private Socket connection = null;
     private BufferedInputStream bufferedInputStream = null;
     private BufferedOutputStream bufferedOutputStream = null;
-    private State state = State.WAITING_FOR_TCP_CONNECTION;
+    private State state = State.CONNECTED;
     private String IPAddress;
     private int port;
     private boolean isRunning;
     private BufferedReader bufferedReader;
 
-    public Client(String IPAddress, int port) throws Exception {
+    public ClientDomaine(String IPAddress, int port) throws Exception {
         this.IPAddress = IPAddress;
         this.port = port;
         this.isRunning = true;
@@ -39,13 +42,13 @@ public class Client extends Observable implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Thread running on Client");
+        System.out.println("Thread running on ClientDomaine");
 
         try {
             while (isRunning) {
                 String line = "";
                 while ((line = bufferedReader.readLine()) != null) {
-                    System.out.println("[Client] Message reçu : " + line);
+                    System.out.println("[ClientDomaine] Message reçu : " + line);
                     parseReceivedExpression(line);
                 }
             }
@@ -72,25 +75,47 @@ public class Client extends Observable implements Runnable {
             String returnCode = splittedExpression[0];
 
             switch (returnCode){
-                case "220":
-                    handleValidatedTCPConnectionAnswer(splittedExpression);
+                case "250":
+                    handlePositiveAnswer(splittedExpression);
             }
         }
     }
 
-    private void handleValidatedTCPConnectionAnswer(String[] splittedExpression) {
-        state = State.CONNECTED;
-        setChanged();
-        notifyObservers(LOGGED);
+    private void handlePositiveAnswer(String[] splittedExpression) {
+        switch(state){
+            case CONNECTED:
+                break;
+            case IDENTIFIED:
+                break;
+            case WAITING_FOR_RECIPIENT:
+                break;
+            case VALIDATED_RECIPIENT:
+                break;
+            case SENDING:
+                break;
+            case SENDING_DATA:
+                break;
+        }
     }
 
-
-
-
-
-
-    public void sendMail(String from, String to, String subject, String content) {
-        // TODO : Ouvrir un ClientDomaine par domaine et lui fournir les mails le concernant
+    // EHLO
+    public void ehlo(String username) {
+        String message = "EHLO " + username + "\n";
+        sendMessage(message);
     }
 
+    //QUIT
+    public void quit() {
+        sendMessage("QUIT ");
+    }
+
+    public void stop() {
+
+        this.isRunning = false;
+        try {
+            this.connection.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

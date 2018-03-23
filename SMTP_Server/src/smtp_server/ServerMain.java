@@ -106,33 +106,25 @@ public class ServerMain extends Application implements Observer {
         sp.setContent(fp);
         grid.add(sp, 0, 2, 7, 40);
 
-        writeInformationInLog("Veuillez choisir un port et démarrer le serveur.");
+        writeInformationInLog("Veuillez démarrer le serveur pour lancer les serveurs propres à chaque domaines.");
 
         startServerButton.setOnAction(e -> {
             try {
-                if (serverPortField.getText().equals(""))
-                    writeErrorInLog("Une erreur est survenue. Le port doit être renseigné.");
-                else {
-                    int port = Integer.valueOf(serverPortField.getText());
+                if (startServerButton.getText().equals("Démarrer")) {
+                    server = Server.getInstance();
+                    server.addObserver(ServerMain.this);
 
-                    if (startServerButton.getText().equals("Démarrer")) {
-                        server = Server.getInstance();
-
-                        if (!serverPortField.getText().isEmpty())
-                            server.setPort(Integer.valueOf(serverPortField.getText()));
-                        server.addObserver(ServerMain.this);
-                        startServerButton.setText("Arrêter");
-                        writeSuccessInLog("Le serveur a démarré avec succès sur le port " + port + " de l'hôte " + InetAddress.getLocalHost());
-
-                    } else {
-                        server.close();
-                        startServerButton.setText("Démarrer");
-                        writeSuccessInLog("Le serveur a été arrêté avec succès.");
-                    }
+                    startServerButton.setText("Arrêter");
+                    writeSuccessInLog("Le serveur a démarré avec succès.");
 
                 }
-            } catch (Exception ex) {
-                writeErrorInLog("Une erreur est survenue. Le port n'est pas disponible. Veuillez en choisir un autre.");
+                else {
+                    startServerButton.setText("Démarrer");
+                    writeSuccessInLog("Le serveur a été arrêté avec succès.");
+                }
+            }
+            catch (Exception ex) {
+                writeErrorInLog("Une erreur est survenue.");
                 Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, ex);
             }
         });

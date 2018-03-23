@@ -16,7 +16,6 @@ public class Communication extends Observable implements Runnable {
         RSET,
         DATA,
         QUIT,
-        CHECK,
         NONE
     }
 
@@ -36,13 +35,16 @@ public class Communication extends Observable implements Runnable {
         try {
             bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
     public void run() {
+        sendReadyMessage();
+
         try {
             while (isRunning) {
                 String line = "";
@@ -50,7 +52,8 @@ public class Communication extends Observable implements Runnable {
                     parseReceivedExpression(line);
                 }
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
     }
@@ -60,7 +63,8 @@ public class Communication extends Observable implements Runnable {
         Command currentCommand = getCommandFromEnum(splittedCommand[0]);
 
         switch (currentCommand){
-            case EHLO: sendMessage("250 bienvenue\n");
+            case EHLO:
+                ehlo();
             case MAIL:
                 break;
             case RCPT:
@@ -70,8 +74,6 @@ public class Communication extends Observable implements Runnable {
             case DATA:
                 break;
             case QUIT:
-                break;
-            case CHECK:
                 break;
         }
     }
@@ -90,54 +92,25 @@ public class Communication extends Observable implements Runnable {
                 return Command.DATA;
             case "QUIT":
                 return Command.QUIT;
-            case "CHECK":
-                return Command.CHECK;
             default:
                 return Command.NONE;
         }
     }
 
-    private int getCommandParameterCount(Command command) {
-        switch (command) {
-            case EHLO:
-            case MAIL:
-            case RCPT:
-                return 1;
-            case CHECK:
-            case QUIT:
-            case RSET:
-            case DATA:
-                return 0;
-            default:
-                return -1;
+    private void sendReadyMessage() {
+        String message = "220 " + socket.getInetAddress().toString() + ":" + socket.getPort() + " SMTP Ready";
+        setChanged();
+        notifyObservers("Établissement d'une connection TCP avec" + socket.getInetAddress().toString() + " (port " + socket.getPort() + ")");
+        try {
+            sendMessage(message);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private void executeCommand() {
-        switch (currentCommand) {
-            case EHLO:
-                break;
-            case MAIL:
-                break;
-            case RCPT:
-                break;
-            case RSET:
-                break;
-            case DATA:
-                break;
-            case QUIT:
-                quit();
-                break;
-            case CHECK:
-                sendWelcomeMessage();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void sendWelcomeMessage(){
-        String message = "+OK POP3 server ready";
+    private void ehlo(){
+        String message = "250 SMTP server ready";
         setChanged();
         notifyObservers("Établissement d'une connection TCP avec" + socket.getInetAddress().toString() + " (port " + socket.getPort() + ")");
         try {
@@ -149,7 +122,6 @@ public class Communication extends Observable implements Runnable {
 
     private void quit()
     {
-
         try {
             sendMessage("+OK Logging out\n");
             setChanged();
@@ -162,7 +134,7 @@ public class Communication extends Observable implements Runnable {
 
     private void sendMessage(String message) throws IOException {
         bufferedOutputStream.write(message.getBytes("UTF-8"));
-        System.out.println(message);
+        System.out.println("[ServeurDomaine] Message envoyé : " + message);
         try {
             bufferedOutputStream.flush();
         } catch (IOException e) {
