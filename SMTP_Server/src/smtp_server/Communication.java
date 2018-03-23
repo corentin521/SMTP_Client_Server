@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
@@ -47,6 +48,7 @@ public class Communication extends Observable implements Runnable {
         this.socket = socket;
         this.isRunning = true;
         currentCommand = Command.NONE;
+        validRecipients = new ArrayList<>();
 
         try {
             bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
@@ -77,7 +79,7 @@ public class Communication extends Observable implements Runnable {
     private void parseReceivedExpression(String expression) throws IOException {
         if(state == State.SENDING)
         {
-
+            System.out.println("envoie en cours");
         }
         else
         {
@@ -88,9 +90,11 @@ public class Communication extends Observable implements Runnable {
                 case EHLO:
                     ehlo();
                     state = State.IDENTIFIED;
+                    break;
                 case MAIL:
                     if(state == State.IDENTIFIED)
                     {
+
                         sendMessage("250 OK ");
                         state = State.WAITING_FOR_RECIPIENT;
                     }
