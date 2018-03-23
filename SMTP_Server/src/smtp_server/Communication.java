@@ -123,7 +123,7 @@ public class Communication extends Observable implements Runnable {
     private void quit()
     {
         try {
-            sendMessage("+OK Logging out\n");
+            sendMessage("+OK Logging out");
             setChanged();
             notifyObservers("Déconnexion de " + userLogin);
         } catch (IOException e) {
@@ -133,6 +133,7 @@ public class Communication extends Observable implements Runnable {
     }
 
     private void sendMessage(String message) throws IOException {
+        message += "\n";
         bufferedOutputStream.write(message.getBytes("UTF-8"));
         System.out.println("[ServeurDomaine] Message envoyé : " + message);
         try {

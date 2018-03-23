@@ -2,15 +2,16 @@ package smtp_client;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -18,7 +19,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.net.ConnectException;
-import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -67,12 +67,6 @@ public class ClientMain extends Application implements Observer {
         primaryStage.show();
     }
 
-
-
-
-
-
-
     private void createLoginInterface() {
         GridPane loginGrid = new GridPane();
         loginGrid.setAlignment(Pos.CENTER);
@@ -119,7 +113,7 @@ public class ClientMain extends Application implements Observer {
 
     private void connectClient() {
         if (client != null) {
-            client.stop();
+           // client.stop();
             client = null;
         }
 
@@ -159,13 +153,6 @@ public class ClientMain extends Application implements Observer {
         }
     }
 
-
-
-
-
-
-
-
     private void createMailboxInterface(){
         GridPane mailboxGrid = new GridPane();
         mailboxGrid.setHgap(10);
@@ -204,7 +191,7 @@ public class ClientMain extends Application implements Observer {
         logOutButton.setOnAction(e -> {
             userNameTextField.setText("");
             errorField.setText("");
-            client.quit();
+            //client.quit();
         });
 
         sendMailButton.setOnAction(e -> {
@@ -213,12 +200,6 @@ public class ClientMain extends Application implements Observer {
 
         mailFormScene = new Scene(mailboxGrid, 650, 450);
     }
-
-
-
-
-
-
 
    @Override
    public void update(Observable o, Object arg) {
