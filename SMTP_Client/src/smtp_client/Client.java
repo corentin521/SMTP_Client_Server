@@ -2,11 +2,13 @@ package smtp_client;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Observable;
+import java.util.Observer;
 
 import static smtp_client.Enums.Response.LOGGED;
 
-public class Client extends Observable implements Runnable {
+public class Client extends Observable implements Observer, Runnable {
 
     private enum State {
         WAITING_FOR_TCP_CONNECTION,
@@ -90,7 +92,44 @@ public class Client extends Observable implements Runnable {
 
 
     public void sendMail(String from, String to, String subject, String content) {
-        // TODO : Ouvrir un ClientDomaine par domaine et lui fournir les mails le concernant
+        try {
+            // Récupération des différents noms de domaine
+            String[] recipients = to.split(";");
+            ArrayList<String> domains = new ArrayList<>();
+            String currentDomain;
+            for (String recipient : recipients) {
+                currentDomain = recipient.split("@")[1];
+                if (!domains.contains(currentDomain))
+                    domains.add(currentDomain);
+            }
+
+            // Création des ClientDomaine pour chaque domaine des receveurs
+            ArrayList<String> recipientsFromCurrentDomain = new ArrayList<>();
+            ClientDomaine clientDomaine;
+            for (String domain : domains) {
+                for (String recipient : recipients) {
+                    if (recipient.split("@")[1].equals(domain))
+                        recipientsFromCurrentDomain.add(recipient);
+                }
+
+                clientDomaine = new ClientDomaine(this.IPAddress, this.port, from, recipientsFromCurrentDomain, subject, content);
+                clientDomaine.addObserver(Client.this);
+                new Thread(clientDomaine).start();
+
+                recipientsFromCurrentDomain.clear();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
+
+
+
+
+    @Override
+    public void update(Observable o, Object arg) {
+
+    }
 }

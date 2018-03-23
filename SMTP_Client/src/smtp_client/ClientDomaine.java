@@ -2,6 +2,7 @@ package smtp_client;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Observable;
 
 public class ClientDomaine extends Observable implements Runnable {
@@ -13,7 +14,6 @@ public class ClientDomaine extends Observable implements Runnable {
         VALIDATED_RECIPIENT,
         SENDING,
         SENDING_DATA
-
     }
 
     private Socket connection = null;
@@ -25,7 +25,7 @@ public class ClientDomaine extends Observable implements Runnable {
     private boolean isRunning;
     private BufferedReader bufferedReader;
 
-    public ClientDomaine(String IPAddress, int port) throws Exception {
+    public ClientDomaine(String IPAddress, int port, String from, ArrayList<String> recipients, String subject, String content) throws Exception {
         this.IPAddress = IPAddress;
         this.port = port;
         this.isRunning = true;
@@ -38,6 +38,8 @@ public class ClientDomaine extends Observable implements Runnable {
 
         bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream());
         bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+
+        // TODO : envoyer les EHLO puis les RCPT puis les DATA
     }
 
     @Override
