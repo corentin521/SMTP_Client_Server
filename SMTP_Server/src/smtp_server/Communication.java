@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.List;
 import java.util.Observable;
 
 public class Communication extends Observable implements Runnable {
@@ -19,12 +20,27 @@ public class Communication extends Observable implements Runnable {
         NONE
     }
 
+    private enum State {
+        CONNECTED,
+        IDENTIFIED,
+        WAITING_FOR_RECIPIENT,
+        VALIDATED_RECIPIENT,
+        SENDING,
+        SENDING_DATA
+    }
+
+
+
     private Socket socket;
     private boolean isRunning;
     private Command currentCommand;
     private BufferedOutputStream bufferedOutputStream;
     private String userLogin = "";
     private BufferedReader bufferedReader;
+
+    private State state = State.CONNECTED;
+
+    private List<String> validRecipients;
 
 
     public Communication(Socket socket) {
@@ -59,23 +75,78 @@ public class Communication extends Observable implements Runnable {
     }
 
     private void parseReceivedExpression(String expression) throws IOException {
-        String[] splittedCommand = expression.split(" ");
-        Command currentCommand = getCommandFromEnum(splittedCommand[0]);
+        if(state == State.SENDING)
+        {
 
-        switch (currentCommand){
-            case EHLO:
-                ehlo();
-            case MAIL:
-                break;
-            case RCPT:
-                break;
-            case RSET:
-                break;
-            case DATA:
-                break;
-            case QUIT:
-                break;
         }
+        else
+        {
+            String[] splittedCommand = expression.split(" ");
+            Command currentCommand = getCommandFromEnum(splittedCommand[0]);
+
+            switch (currentCommand){
+                case EHLO:
+                    ehlo();
+                    state = State.IDENTIFIED;
+                case MAIL:
+                    if(state == State.IDENTIFIED)
+                    {
+                        sendMessage("250 OK ");
+                        state = State.WAITING_FOR_RECIPIENT;
+                    }
+                    else
+                    {
+                        sendMessage("550 ");
+                    }
+                    break;
+                case RCPT:
+                    if(state == State.WAITING_FOR_RECIPIENT)
+                    {
+                        if(recipientIsValid(splittedCommand[2]))
+                        {
+                            sendMessage("250 OK ");
+                            validRecipients.add(splittedCommand[2]);
+                            state = State.VALIDATED_RECIPIENT;
+                        }
+                        else
+                        {
+                            sendMessage("550 invalid user");
+                        }
+                    }
+                    else if(state == State.VALIDATED_RECIPIENT)
+                    {
+                        if(recipientIsValid(splittedCommand[2]))
+                        {
+                            sendMessage("250 OK ");
+                            validRecipients.add(splittedCommand[2]);
+                        }
+                        else
+                        {
+                            sendMessage("550 invalid user");
+                        }
+                    }
+                    break;
+                case RSET:
+                    break;
+                case DATA:
+                    if(state == State.VALIDATED_RECIPIENT)
+                    {
+                        sendMessage("354 Send message content; end with <CRLF>.<CRLF>");
+                        state = State.SENDING;
+                    }
+                    else
+                    {
+                        sendMessage("550 ");
+                    }
+                    break;
+                case QUIT:
+                    quit();
+                    closeConnection();
+                    break;
+            }
+        }
+
+
     }
 
     private Command getCommandFromEnum(String command) {
@@ -120,6 +191,7 @@ public class Communication extends Observable implements Runnable {
         }
     }
 
+
     private void quit()
     {
         try {
@@ -130,6 +202,11 @@ public class Communication extends Observable implements Runnable {
             e.printStackTrace();
         }
         closeConnection();
+    }
+
+    private boolean recipientIsValid(String recipient)
+    {
+        return true;
     }
 
     private void sendMessage(String message) throws IOException {
