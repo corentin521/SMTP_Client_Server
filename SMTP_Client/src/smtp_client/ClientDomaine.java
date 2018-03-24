@@ -2,9 +2,7 @@ package smtp_client;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Stack;
+import java.util.*;
 
 public class ClientDomaine extends Observable implements Runnable {
 
@@ -51,32 +49,30 @@ public class ClientDomaine extends Observable implements Runnable {
         bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 
         ehlo(from);
-
-        // TODO : envoyer les EHLO puis les RCPT puis les DATA
     }
 
     @Override
     public void run() {
-        System.out.println("Thread running on ClientDomaine");
+        System.out.println("Thread running on ClientDomaine"+port);
 
         try {
             while (isRunning) {
                 String line = "";
                 while ((line = bufferedReader.readLine()) != null) {
-                    System.out.println("[ClientDomaine] Message reçu : " + line);
+                    System.out.println("[ClientDomaine:"+port+"] Message reçu : " + line);
                     parseReceivedExpression(line);
                 }
             }
         }
         catch (Exception ex) {
-            System.err.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
     public void sendMessage(String message) {
         try {
             bufferedOutputStream.write(message.getBytes());
-            System.out.println(message);
+            System.out.println("[ClientDomaine:" + port + "] Message envoyé : " + message);
             bufferedOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -91,7 +87,6 @@ public class ClientDomaine extends Observable implements Runnable {
 
             switch (returnCode){
                 case "250":
-                    handlePositiveAnswer(splittedExpression);
                 case "354":
                     handlePositiveAnswer(splittedExpression);
                 case "550":
@@ -103,24 +98,20 @@ public class ClientDomaine extends Observable implements Runnable {
     private void handleNegativeAnswer(String[] splittedExpression) {
         switch(state){
             case WAITING_FOR_RECIPIENT:
-                if(recipients.isEmpty())
-                {
+                if(recipients.isEmpty()) {
                     quit();
                     stop();
                 }
-                else
-                {
+                else {
                     rcpt();
                 }
                 break;
             case VALIDATED_RECIPIENT:
-                if(recipients.isEmpty())
-                {
+                if(recipients.isEmpty()) {
                     state = State.SENDING;
                     data();
                 }
-                else
-                {
+                else {
                     rcpt();
                 }
                 break;
@@ -142,25 +133,21 @@ public class ClientDomaine extends Observable implements Runnable {
                 rcpt();
                 break;
             case WAITING_FOR_RECIPIENT:
-                if(recipients.isEmpty())
-                {
+                if(recipients.isEmpty()) {
                     state = State.SENDING;
                     data();
                 }
-                else
-                {
+                else {
                     state = State.VALIDATED_RECIPIENT;
                     rcpt();
                 }
                 break;
             case VALIDATED_RECIPIENT:
-                if(recipients.isEmpty())
-                {
+                if(recipients.isEmpty()) {
                     state = State.SENDING;
                     data();
                 }
-                else
-                {
+                else {
                     rcpt();
                 }
                 break;
@@ -203,10 +190,17 @@ public class ClientDomaine extends Observable implements Runnable {
     }
 
 
-    //envoie du mail
+    // Envoi du mail
     public void sendMail()
     {
-        String message = subject + "\n" + content + "\n" + ".\n";
+        // TODO : le mail doit s'envoyer autant de fois qu'il y a de destinataire ! Dans le fichier .txt de réception faudra qu'il y ait qu'un seul destinataire dans le "To:"
+        String message = "From: " + from + "\n" +
+                        "To: " + recipients + "\n" +
+                        "Subject: " + subject + "\n" +
+                        "Date: " + new Date() + "\n" +
+                        "Message-ID: " + getRandomID() + "\n\n" +
+                        content + "\n" +
+                        ".\n";
         sendMessage(message);
     }
 
@@ -223,5 +217,19 @@ public class ClientDomaine extends Observable implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getRandomID () {
+        String IDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+        StringBuilder generatedID = new StringBuilder();
+        Random random = new Random();
+        int index;
+
+        while (generatedID.length() < 20) {
+            index = (int) (random.nextFloat() * IDChars.length());
+            generatedID.append(IDChars.charAt(index));
+        }
+
+        return generatedID.toString();
     }
 }

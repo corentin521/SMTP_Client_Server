@@ -38,10 +38,6 @@ public class ClientMain extends Application implements Observer {
     private TextField subjectTextField;
     private TextArea contentTextField;
 
-    private static final int FREE_PORT = 2500;
-    private static final int HOTMAIL_PORT = 2501;
-    private static final int GMAIL_PORT = 2502;
-
     public static void main(String args[]){
         launch(args);
     }
@@ -121,7 +117,7 @@ public class ClientMain extends Application implements Observer {
         Thread clientThread;
         try {
             String emailDomain = userNameTextField.getText().split("@")[1];
-            int portToConnect = getPortFromEmailDomain(emailDomain);
+            int portToConnect = Client.getPortFromEmailDomain(emailDomain);
             userName = userNameTextField.getText();
 
             if (portToConnect != 0) {
@@ -137,19 +133,6 @@ public class ClientMain extends Application implements Observer {
         catch (Exception e) {
             if(e instanceof ConnectException)
                 errorField.setText("Une erreur réseau est survenue.");
-        }
-    }
-
-    private int getPortFromEmailDomain(String email) {
-        switch (email) {
-            case "free.fr":
-                return FREE_PORT;
-            case "hotmail.fr":
-                return HOTMAIL_PORT;
-            case "gmail.com":
-                return GMAIL_PORT;
-            default:
-                return 0;
         }
     }
 
@@ -172,16 +155,19 @@ public class ClientMain extends Application implements Observer {
         Label toLabel = new Label("A :");
         mailboxGrid.add(toLabel, 1, 3);
         toTextField = new TextField();
+        toTextField.setText("test@free.fr;dupont@gmail.com");
         mailboxGrid.add(toTextField, 2, 3, 45, 1);
         
         Label subjectLabel = new Label("Objet :");
         mailboxGrid.add(subjectLabel, 1, 4);
         subjectTextField = new TextField();
+        subjectTextField.setText("Test subject");
         mailboxGrid.add(subjectTextField, 2, 4, 45, 1);
 
         Label contentLabel = new Label("Contenu :");
         mailboxGrid.add(contentLabel, 1, 5);
         contentTextField = new TextArea();
+        contentTextField.setText("Test content");
         mailboxGrid.add(contentTextField, 1, 6, 45, 18);
 
         Button sendMailButton = new Button("Envoyer");
@@ -195,7 +181,7 @@ public class ClientMain extends Application implements Observer {
         });
 
         sendMailButton.setOnAction(e -> {
-           client.sendMail(userNameTextField.toString(), toTextField.toString(), subjectTextField.toString(), contentTextField.toString());
+           client.sendMail(userNameTextField.getText(), toTextField.getText(), subjectTextField.getText(), contentTextField.getText());
         });
 
         mailFormScene = new Scene(mailboxGrid, 650, 450);

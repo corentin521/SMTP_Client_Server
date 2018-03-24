@@ -15,7 +15,7 @@ public class Communication extends Observable implements Runnable {
         EHLO,
         MAIL,
         RCPT,
-        RSET,
+        RST,
         DATA,
         QUIT,
         NONE
@@ -29,7 +29,6 @@ public class Communication extends Observable implements Runnable {
         SENDING,
         SENDING_DATA
     }
-
 
 
     private Socket socket;
@@ -72,85 +71,74 @@ public class Communication extends Observable implements Runnable {
             }
         }
         catch (Exception ex) {
-            System.err.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
     private void parseReceivedExpression(String expression) throws IOException {
-        if(state == State.SENDING)
-        {
-            System.out.println("envoie en cours");
+        if(state == State.SENDING) {
+            System.out.println("SENDING : " + expression + " / expression.equals('.') ? " + expression.equals("."));
         }
-        else
-        {
+        else {
             String[] splittedCommand = expression.split(" ");
             Command currentCommand = getCommandFromEnum(splittedCommand[0]);
 
             switch (currentCommand){
                 case EHLO:
-                    ehlo();
+                    sendMessage("250-smtp." + socket.getInetAddress().toString() + ":" + socket.getPort() + "\n" +
+                                "250-PIPELINING\n" +
+                                "250 8BITMIME");
                     state = State.IDENTIFIED;
+
+                    setChanged();
+                    notifyObservers("Établissement d'une connection TCP avec" + socket.getInetAddress().toString() + " (port " + socket.getPort() + ")");
                     break;
                 case MAIL:
-                    if(state == State.IDENTIFIED)
-                    {
-
-                        sendMessage("250 OK ");
+                    if(state == State.IDENTIFIED) {
+                        sendMessage("250 Sender ok");
                         state = State.WAITING_FOR_RECIPIENT;
                     }
-                    else
-                    {
-                        sendMessage("550 ");
+                    else {
+                        sendMessage("550");
                     }
                     break;
                 case RCPT:
-                    if(state == State.WAITING_FOR_RECIPIENT)
-                    {
-                        if(recipientIsValid(splittedCommand[2]))
-                        {
-                            sendMessage("250 OK ");
+                    if(state == State.WAITING_FOR_RECIPIENT || state == State.VALIDATED_RECIPIENT) {
+                        if(recipientIsValid(splittedCommand[2])) {
+                            sendMessage("250 Recipient ok");
                             validRecipients.add(splittedCommand[2]);
-                            state = State.VALIDATED_RECIPIENT;
+
+                            if(state == State.WAITING_FOR_RECIPIENT)
+                                state = State.VALIDATED_RECIPIENT;
                         }
-                        else
-                        {
-                            sendMessage("550 invalid user");
+                        else {
+                            sendMessage("550 Invalid user");
                         }
                     }
-                    else if(state == State.VALIDATED_RECIPIENT)
-                    {
-                        if(recipientIsValid(splittedCommand[2]))
-                        {
-                            sendMessage("250 OK ");
-                            validRecipients.add(splittedCommand[2]);
-                        }
-                        else
-                        {
-                            sendMessage("550 invalid user");
-                        }
+                    else {
+                        sendMessage("550");
                     }
                     break;
-                case RSET:
+                case RST:
                     break;
                 case DATA:
-                    if(state == State.VALIDATED_RECIPIENT)
-                    {
+                    if(state == State.VALIDATED_RECIPIENT) {
                         sendMessage("354 Send message content; end with <CRLF>.<CRLF>");
                         state = State.SENDING;
                     }
-                    else
-                    {
-                        sendMessage("550 ");
+                    else {
+                        sendMessage("550");
                     }
                     break;
                 case QUIT:
-                    quit();
+                    sendMessage("221 Bye");
+                    setChanged();
+                    notifyObservers("Déconnexion de " + userLogin);
+
                     closeConnection();
                     break;
             }
         }
-
-
     }
 
     private Command getCommandFromEnum(String command) {
@@ -161,8 +149,8 @@ public class Communication extends Observable implements Runnable {
                 return Command.MAIL;
             case "RCPT":
                 return Command.RCPT;
-            case "RSET":
-                return Command.RSET;
+            case "RST":
+                return Command.RST;
             case "DATA":
                 return Command.DATA;
             case "QUIT":
@@ -173,7 +161,7 @@ public class Communication extends Observable implements Runnable {
     }
 
     private void sendReadyMessage() {
-        String message = "220 " + socket.getInetAddress().toString() + ":" + socket.getPort() + " SMTP Ready";
+        String message = "220 smtp." + socket.getInetAddress().toString() + ":" + socket.getPort() + " SMTP Ready";
         setChanged();
         notifyObservers("Établissement d'une connection TCP avec" + socket.getInetAddress().toString() + " (port " + socket.getPort() + ")");
         try {
@@ -184,30 +172,6 @@ public class Communication extends Observable implements Runnable {
         }
     }
 
-    private void ehlo(){
-        String message = "250 SMTP server ready";
-        setChanged();
-        notifyObservers("Établissement d'une connection TCP avec" + socket.getInetAddress().toString() + " (port " + socket.getPort() + ")");
-        try {
-            sendMessage(message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private void quit()
-    {
-        try {
-            sendMessage("+OK Logging out");
-            setChanged();
-            notifyObservers("Déconnexion de " + userLogin);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        closeConnection();
-    }
-
     private boolean recipientIsValid(String recipient)
     {
         return true;
@@ -216,7 +180,7 @@ public class Communication extends Observable implements Runnable {
     private void sendMessage(String message) throws IOException {
         message += "\n";
         bufferedOutputStream.write(message.getBytes("UTF-8"));
-        System.out.println("[ServeurDomaine] Message envoyé : " + message);
+        System.out.println("[Communication:"+socket.getPort()+"] Message envoyé : " + message);
         try {
             bufferedOutputStream.flush();
         } catch (IOException e) {

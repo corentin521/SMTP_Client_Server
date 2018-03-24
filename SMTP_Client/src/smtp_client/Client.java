@@ -15,6 +15,10 @@ public class Client extends Observable implements Observer, Runnable {
         CONNECTED
     }
 
+    private static final int FREE_PORT = 2500;
+    private static final int HOTMAIL_PORT = 2501;
+    private static final int GMAIL_PORT = 2502;
+
     private Socket connection = null;
     private BufferedInputStream bufferedInputStream = null;
     private BufferedOutputStream bufferedOutputStream = null;
@@ -103,6 +107,8 @@ public class Client extends Observable implements Observer, Runnable {
                     domains.add(currentDomain);
             }
 
+            System.out.println("Domaine récupérés : " + domains);
+
             // Création des ClientDomaine pour chaque domaine des receveurs
             ArrayList<String> recipientsFromCurrentDomain = new ArrayList<>();
             ClientDomaine clientDomaine;
@@ -112,7 +118,7 @@ public class Client extends Observable implements Observer, Runnable {
                         recipientsFromCurrentDomain.add(recipient);
                 }
 
-                clientDomaine = new ClientDomaine(this.IPAddress, this.port, from, recipientsFromCurrentDomain, subject, content);
+                clientDomaine = new ClientDomaine(this.IPAddress, getPortFromEmailDomain(domain), from, recipientsFromCurrentDomain, subject, content);
                 clientDomaine.addObserver(Client.this);
                 new Thread(clientDomaine).start();
 
@@ -121,6 +127,19 @@ public class Client extends Observable implements Observer, Runnable {
         }
         catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static int getPortFromEmailDomain(String domain) {
+        switch (domain) {
+            case "free.fr":
+                return FREE_PORT;
+            case "hotmail.fr":
+                return HOTMAIL_PORT;
+            case "gmail.com":
+                return GMAIL_PORT;
+            default:
+                return 0;
         }
     }
 
