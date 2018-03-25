@@ -1,28 +1,26 @@
 package smtp_server;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Server extends Observable implements Observer {
+public class Server {
 
     public static Server instance;
 
     private static final int FREE_PORT = 2500;
     private static final int HOTMAIL_PORT = 2501;
     private static final int GMAIL_PORT = 2502;
+    private List<ServeurDomaine> domaines;
 
     public Server() {
+        domaines = new ArrayList<>();
         launchEveryDomains();
     }
 
     private void launchEveryDomains() {
-        ServeurDomaine.getInstance(FREE_PORT);
-        ServeurDomaine.getInstance(HOTMAIL_PORT);
-        ServeurDomaine.getInstance(GMAIL_PORT);
+        domaines.add(new ServeurDomaine(FREE_PORT, "Free"));
+        domaines.add(new ServeurDomaine(HOTMAIL_PORT, "Hotmail"));
+        domaines.add(new ServeurDomaine(GMAIL_PORT, "Gmail"));
     }
 
     public static Server getInstance() {
@@ -32,11 +30,7 @@ public class Server extends Observable implements Observer {
         return instance;
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        if (arg instanceof String) {
-            setChanged();
-            notifyObservers(arg);
-        }
+    public List<ServeurDomaine> getDomaines() {
+        return domaines;
     }
 }

@@ -3,12 +3,13 @@ package smtp_server;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -39,12 +40,6 @@ public class ServerMain extends Application implements Observer {
 
     @Override
     public void start(Stage primaryStage) throws UnknownHostException {
-
-//        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-//        primaryStage.setTitle("Hello World");
-//        primaryStage.setScene(new Scene(root, 300, 275));
-//        primaryStage.show();
-
         initUserInterface(primaryStage);
     }
 
@@ -106,24 +101,27 @@ public class ServerMain extends Application implements Observer {
         sp.setContent(fp);
         grid.add(sp, 0, 2, 7, 40);
 
-        writeInformationInLog("Veuillez démarrer le serveur pour lancer les serveurs propres à chaque domaines.");
+        writeInformationInLog("Veuillez démarrer le serveur pour lancer les serveurs propres à chaque domaine.");
 
         startServerButton.setOnAction(e -> {
             try {
                 if (startServerButton.getText().equals("Démarrer")) {
                     server = Server.getInstance();
-                    server.addObserver(ServerMain.this);
+
+                    for(ServeurDomaine sd : server.getDomaines()){
+                        sd.addObserver(ServerMain.this);
+                        sd.launchServer();
+                    }
+
 
                     startServerButton.setText("Arrêter");
                     writeSuccessInLog("Le serveur a démarré avec succès.");
 
-                }
-                else {
+                } else {
                     startServerButton.setText("Démarrer");
                     writeSuccessInLog("Le serveur a été arrêté avec succès.");
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 writeErrorInLog("Une erreur est survenue.");
                 Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -181,9 +179,9 @@ public class ServerMain extends Application implements Observer {
     public void update(Observable o, Object arg) {
         if (arg instanceof String) {
             Platform.runLater(() -> {
-                    String message = (String) arg;
-                    writeInformationInLog(message);
-                }
+                        String message = (String) arg;
+                        writeInformationInLog(message);
+                    }
             );
         }
     }

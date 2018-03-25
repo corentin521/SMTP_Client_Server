@@ -53,18 +53,17 @@ public class ClientDomaine extends Observable implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Thread running on ClientDomaine"+port);
+        System.out.println("Thread running on ClientDomaine " + port);
 
         try {
             while (isRunning) {
                 String line = "";
                 while ((line = bufferedReader.readLine()) != null) {
-                    System.out.println("[ClientDomaine:"+port+"] Message reçu : " + line);
+                    System.out.println("[ClientDomaine:" + port + "] Message reçu : " + line);
                     parseReceivedExpression(line);
                 }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -82,10 +81,10 @@ public class ClientDomaine extends Observable implements Runnable {
     private void parseReceivedExpression(String expression) {
         String[] splittedExpression = expression.split(" ");
 
-        if(splittedExpression.length > 0){
+        if (splittedExpression.length > 0) {
             String returnCode = splittedExpression[0];
 
-            switch (returnCode){
+            switch (returnCode) {
                 case "250":
                     handlePositiveAnswer(splittedExpression);
                     break;
@@ -100,22 +99,20 @@ public class ClientDomaine extends Observable implements Runnable {
     }
 
     private void handleNegativeAnswer(String[] splittedExpression) {
-        switch(state){
+        switch (state) {
             case WAITING_FOR_RECIPIENT:
-                if(recipients.isEmpty()) {
+                if (recipients.isEmpty()) {
                     quit();
                     stop();
-                }
-                else {
+                } else {
                     rcpt();
                 }
                 break;
             case VALIDATED_RECIPIENT:
-                if(recipients.isEmpty()) {
+                if (recipients.isEmpty()) {
                     state = State.SENDING;
                     data();
-                }
-                else {
+                } else {
                     rcpt();
                 }
                 break;
@@ -127,7 +124,7 @@ public class ClientDomaine extends Observable implements Runnable {
     }
 
     private void handlePositiveAnswer(String[] splittedExpression) {
-        switch(state){
+        switch (state) {
             case CONNECTED:
                 state = State.IDENTIFIED;
                 mailFrom(from);
@@ -137,21 +134,19 @@ public class ClientDomaine extends Observable implements Runnable {
                 rcpt();
                 break;
             case WAITING_FOR_RECIPIENT:
-                if(recipients.isEmpty()) {
+                if (recipients.isEmpty()) {
                     state = State.SENDING;
                     data();
-                }
-                else {
+                } else {
                     state = State.VALIDATED_RECIPIENT;
                     rcpt();
                 }
                 break;
             case VALIDATED_RECIPIENT:
-                if(recipients.isEmpty()) {
+                if (recipients.isEmpty()) {
                     state = State.SENDING;
                     data();
-                }
-                else {
+                } else {
                     rcpt();
                 }
                 break;
@@ -173,35 +168,31 @@ public class ClientDomaine extends Observable implements Runnable {
     }
 
     //MAIL FROM
-    public void mailFrom(String from)
-    {
+    public void mailFrom(String from) {
         String message = "MAIL FROM: " + from + "\n";
         sendMessage(message);
     }
 
     //RCPT
-    public void rcpt()
-    {
+    public void rcpt() {
         String recipient = recipients.remove(0);
         String message = "RCPT TO: " + recipient + "\n";
         sendMessage(message);
     }
 
     //DATA
-    public void data()
-    {
+    public void data() {
         sendMessage("DATA \n");
     }
 
 
     // Envoi du mail
-    public void sendMail()
-    {
+    public void sendMail() {
         // TODO : le mail doit s'envoyer autant de fois qu'il y a de destinataire ! Dans le fichier .txt de réception faudra qu'il y ait qu'un seul destinataire dans le "To:"
         String message =
                 //"From: " + from + "\n" +
                 //        "To: " + recipients + "\n" +
-                        "Subject: " + subject + "\n" +
+                "Subject: " + subject + "\n" +
                         "Date: " + new Date() + "\n" +
                         "Message-ID: " + getRandomID() + "\n" +
                         content + "\n" +
@@ -224,7 +215,7 @@ public class ClientDomaine extends Observable implements Runnable {
         }
     }
 
-    private String getRandomID () {
+    private String getRandomID() {
         String IDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
         StringBuilder generatedID = new StringBuilder();
         Random random = new Random();

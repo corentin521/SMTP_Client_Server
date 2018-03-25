@@ -90,11 +90,6 @@ public class Client extends Observable implements Observer, Runnable {
         notifyObservers(LOGGED);
     }
 
-
-
-
-
-
     public void sendMail(String from, String to, String subject, String content) {
         try {
             // Récupération des différents noms de domaine
@@ -142,10 +137,6 @@ public class Client extends Observable implements Observer, Runnable {
                 return 0;
         }
     }
-
-
-
-
 
     @Override
     public void update(Observable o, Object arg) {
