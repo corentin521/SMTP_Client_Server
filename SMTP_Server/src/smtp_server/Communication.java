@@ -1,9 +1,6 @@
 package smtp_server;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -156,15 +153,41 @@ public class Communication extends Observable implements Runnable {
     }
 
     private void sendMails() {
-        for (String recipient : validRecipients)
-        {
-            String mail = "From : " + mailFrom + "\n"
-                    + "To :" + recipient + "\n"
-                    + mailData.get(0)
-            + mailData.get(1)
-            + mailData.get(2)
-            + mailData.get(3)
-             +       ".\n";
+        for (String recipient : validRecipients) {
+
+            try {
+                String pathToMailFolder = "SMTP_Server/usersMails.txt";
+                File f = new File(pathToMailFolder);
+                if (!f.exists()) {
+                    f.createNewFile();
+                }
+
+                BufferedWriter bw = new BufferedWriter(new FileWriter(pathToMailFolder, true));
+
+
+                bw.append("From: " + mailFrom);
+                bw.newLine();
+                bw.append("To: " + recipient);
+                bw.newLine();
+                bw.append(mailData.get(0));
+                bw.newLine();
+                bw.append(mailData.get(1));
+                bw.newLine();
+                bw.append(mailData.get(2));
+                bw.newLine();
+                bw.append("content: " + mailData.get(3));
+                bw.newLine();
+                bw.append(".");
+                bw.newLine();
+                bw.newLine();
+
+                bw.flush();
+
+
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
