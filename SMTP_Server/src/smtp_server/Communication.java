@@ -37,10 +37,13 @@ public class Communication extends Observable implements Runnable {
     private BufferedOutputStream bufferedOutputStream;
     private String userLogin = "";
     private BufferedReader bufferedReader;
+    private String mailFrom;
+
 
     private State state = State.CONNECTED;
 
     private List<String> validRecipients;
+    private List<String> mailData;
 
 
     public Communication(Socket socket) {
@@ -48,6 +51,7 @@ public class Communication extends Observable implements Runnable {
         this.isRunning = true;
         currentCommand = Command.NONE;
         validRecipients = new ArrayList<>();
+        mailData = new ArrayList<>();
 
         try {
             bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
@@ -77,7 +81,16 @@ public class Communication extends Observable implements Runnable {
 
     private void parseReceivedExpression(String expression) throws IOException {
         if(state == State.SENDING) {
-            System.out.println("SENDING : " + expression + " / expression.equals('.') ? " + expression.equals("."));
+            System.out.println("SENDING : " + expression );
+            mailData.add(expression);
+
+            if(expression.equals(".") && mailData.size() == 5)
+            {
+                state = State.SENDING_DATA;
+                sendMessage("250 sending data");
+                sendMails();
+            }
+
         }
         else {
             String[] splittedCommand = expression.split(" ");
@@ -96,6 +109,7 @@ public class Communication extends Observable implements Runnable {
                 case MAIL:
                     if(state == State.IDENTIFIED) {
                         sendMessage("250 Sender ok");
+                        mailFrom = splittedCommand[2];
                         state = State.WAITING_FOR_RECIPIENT;
                     }
                     else {
@@ -138,6 +152,19 @@ public class Communication extends Observable implements Runnable {
                     closeConnection();
                     break;
             }
+        }
+    }
+
+    private void sendMails() {
+        for (String recipient : validRecipients)
+        {
+            String mail = "From : " + mailFrom + "\n"
+                    + "To :" + recipient + "\n"
+                    + mailData.get(0)
+            + mailData.get(1)
+            + mailData.get(2)
+            + mailData.get(3)
+             +       ".\n";
         }
     }
 

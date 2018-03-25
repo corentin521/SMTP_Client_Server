@@ -87,10 +87,14 @@ public class ClientDomaine extends Observable implements Runnable {
 
             switch (returnCode){
                 case "250":
+                    handlePositiveAnswer(splittedExpression);
+                    break;
                 case "354":
                     handlePositiveAnswer(splittedExpression);
+                    break;
                 case "550":
                     handleNegativeAnswer(splittedExpression);
+                    break;
             }
         }
     }
@@ -194,11 +198,12 @@ public class ClientDomaine extends Observable implements Runnable {
     public void sendMail()
     {
         // TODO : le mail doit s'envoyer autant de fois qu'il y a de destinataire ! Dans le fichier .txt de réception faudra qu'il y ait qu'un seul destinataire dans le "To:"
-        String message = "From: " + from + "\n" +
-                        "To: " + recipients + "\n" +
+        String message =
+                //"From: " + from + "\n" +
+                //        "To: " + recipients + "\n" +
                         "Subject: " + subject + "\n" +
                         "Date: " + new Date() + "\n" +
-                        "Message-ID: " + getRandomID() + "\n\n" +
+                        "Message-ID: " + getRandomID() + "\n" +
                         content + "\n" +
                         ".\n";
         sendMessage(message);
