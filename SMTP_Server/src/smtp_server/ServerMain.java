@@ -55,43 +55,24 @@ public class ServerMain extends Application implements Observer {
         serverPortLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 12));
         grid.add(serverPortLabel, 0, 0);
 
-        TextField serverPortField = new TextField();
-        serverPortField.setPrefWidth(50);
-        // Default value
-        serverPortField.setText("1230");
-        grid.add(serverPortField, 1, 0);
-
-        // Port validation
-        serverPortField.textProperty().addListener((observable, oldValue, newValue) -> {
-            // Remove non numeric character
-            if (!newValue.matches("\\d*")) {
-                serverPortField.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-            // Set the string length to 5 because the max port is 65536
-            if (!newValue.equals("") && !oldValue.equals("")
-                    && Integer.valueOf(newValue) > Integer.valueOf(oldValue)
-                    && serverPortField.getText().length() >= 5) {
-                serverPortField.setText(serverPortField.getText().substring(0, 5));
-            }
-        });
 
         Button startServerButton = new Button("Démarrer");
         startServerButton.setFont(Font.font("Tahoma", FontWeight.NORMAL, 13));
-        grid.add(startServerButton, 2, 0);
+        grid.add(startServerButton, 1, 0);
 
         Label IPAddresstLabel = new Label("Adresse IP :");
         IPAddresstLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 12));
-        grid.add(IPAddresstLabel, 3, 0);
+        grid.add(IPAddresstLabel, 2, 0);
 
         Label IPAddress = new Label(InetAddress.getLocalHost().getHostAddress());
         IPAddress.setFont(Font.font("Tahoma", FontWeight.NORMAL, 12));
         IPAddress.setTextFill(Color.GREEN);
         IPAddress.setMinWidth(90);
-        grid.add(IPAddress, 4, 0);
+        grid.add(IPAddress, 3, 0);
 
         Button clearLogButton = new Button("Vider le log");
         clearLogButton.setFont(Font.font("Tahoma", FontWeight.NORMAL, 13));
-        grid.add(clearLogButton, 5, 0);
+        grid.add(clearLogButton, 4, 0);
 
         FlowPane fp = new FlowPane();
         this.logLinesList = fp.getChildren();

@@ -64,7 +64,7 @@ public class ClientDomaine extends Observable implements Runnable {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+           // ex.printStackTrace();
         }
     }
 
@@ -175,9 +175,11 @@ public class ClientDomaine extends Observable implements Runnable {
 
     //RCPT
     public void rcpt() {
-        String recipient = recipients.remove(0);
-        String message = "RCPT TO: " + recipient + "\n";
-        sendMessage(message);
+        if(recipients.size() > 0){
+            String recipient = recipients.remove(0);
+            String message = "RCPT TO: " + recipient + "\n";
+            sendMessage(message);
+        }
     }
 
     //DATA
@@ -188,10 +190,7 @@ public class ClientDomaine extends Observable implements Runnable {
 
     // Envoi du mail
     public void sendMail() {
-        // TODO : le mail doit s'envoyer autant de fois qu'il y a de destinataire ! Dans le fichier .txt de réception faudra qu'il y ait qu'un seul destinataire dans le "To:"
         String message =
-                //"From: " + from + "\n" +
-                //        "To: " + recipients + "\n" +
                 "Subject: " + subject + "\n" +
                         "Date: " + new Date() + "\n" +
                         "Message-ID: " + getRandomID() + "\n" +

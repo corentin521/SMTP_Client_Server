@@ -1,8 +1,32 @@
 From: arthur2.dupont@free.fr
+To: test@free.fr
+Subject: Test subject
+Date: Mon Mar 26 08:58:58 CEST 2018
+Message-ID: LxSrNlwkktFzrRDQ88R6
+Test content
+.
+
+From: arthur2.dupont@free.fr
 To: dupont@gmail.com
 Subject: Test subject
-Date: Sun Mar 25 23:51:46 CEST 2018
-Message-ID: AloWy5ybjHAew3EeRczq
-content: Test content
+Date: Mon Mar 26 08:58:58 CEST 2018
+Message-ID: 3ggA0TIQ9iLdfGRwnOuT
+Test content
+.
+
+From: arthur2.dupont@free.fr
+To: test@free.fr
+Subject: Test subject
+Date: Mon Mar 26 08:59:46 CEST 2018
+Message-ID: TuVNoIEtKrqciE4WqXkI
+Test content
+.
+
+From: arthur2.dupont@free.fr
+To: dupont@gmail.com
+Subject: Test subject
+Date: Mon Mar 26 08:59:46 CEST 2018
+Message-ID: 8B8uCd6VUp11nA3UcaYM
+Test content
 .
 

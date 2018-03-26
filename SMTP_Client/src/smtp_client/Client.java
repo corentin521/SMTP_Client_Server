@@ -113,7 +113,7 @@ public class Client extends Observable implements Observer, Runnable {
                         recipientsFromCurrentDomain.add(recipient);
                 }
 
-                clientDomaine = new ClientDomaine(this.IPAddress, getPortFromEmailDomain(domain), from, recipientsFromCurrentDomain, subject, content);
+                clientDomaine = new ClientDomaine(this.IPAddress, getPortFromEmailDomain(domain), from, new ArrayList<>(recipientsFromCurrentDomain), subject, content);
                 clientDomaine.addObserver(Client.this);
                 new Thread(clientDomaine).start();
 

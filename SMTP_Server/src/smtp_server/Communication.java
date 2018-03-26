@@ -27,7 +27,6 @@ public class Communication extends Observable implements Runnable {
         SENDING_DATA
     }
 
-
     private Socket socket;
     private boolean isRunning;
     private Command currentCommand;
@@ -35,13 +34,10 @@ public class Communication extends Observable implements Runnable {
     private String userLogin = "";
     private BufferedReader bufferedReader;
     private String mailFrom;
-
-
     private State state = State.CONNECTED;
 
     private List<String> validRecipients;
     private List<String> mailData;
-
 
     public Communication(Socket socket) {
         this.socket = socket;
@@ -72,7 +68,7 @@ public class Communication extends Observable implements Runnable {
             }
         }
         catch (Exception ex) {
-            ex.printStackTrace();
+           // ex.printStackTrace();
         }
     }
 
@@ -101,7 +97,7 @@ public class Communication extends Observable implements Runnable {
                     state = State.IDENTIFIED;
 
                     setChanged();
-                    notifyObservers("Établissement d'une connection TCP avec" + socket.getInetAddress().toString() + " (port " + socket.getPort() + ")");
+                    notifyObservers("" + socket.getInetAddress().toString() + " (port " + socket.getPort() + ")");
                     break;
                 case MAIL:
                     if(state == State.IDENTIFIED) {
@@ -144,7 +140,7 @@ public class Communication extends Observable implements Runnable {
                 case QUIT:
                     sendMessage("221 Bye");
                     setChanged();
-                    notifyObservers("Déconnexion de " + userLogin);
+                    notifyObservers("Déconnexion de " + socket.getInetAddress().toString());
 
                     closeConnection();
                     break;
@@ -164,7 +160,6 @@ public class Communication extends Observable implements Runnable {
 
                 BufferedWriter bw = new BufferedWriter(new FileWriter(pathToMailFolder, true));
 
-
                 bw.append("From: " + mailFrom);
                 bw.newLine();
                 bw.append("To: " + recipient);
@@ -175,14 +170,17 @@ public class Communication extends Observable implements Runnable {
                 bw.newLine();
                 bw.append(mailData.get(2));
                 bw.newLine();
-                bw.append("content: " + mailData.get(3));
+                bw.append(mailData.get(3));
                 bw.newLine();
                 bw.append(".");
                 bw.newLine();
                 bw.newLine();
 
-                bw.flush();
 
+                setChanged();
+                notifyObservers("Message reçu de la part de " + socket.getInetAddress().toString() + " et envoyé à " + recipient);
+
+                bw.flush();
 
                 bw.close();
             } catch (IOException e) {
