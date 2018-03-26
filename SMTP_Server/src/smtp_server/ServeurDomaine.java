@@ -3,6 +3,7 @@ package smtp_server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -12,10 +13,12 @@ public class ServeurDomaine extends Observable implements Observer {
     private ServerSocket serverDomaineSocket;
     private boolean isRunning = true;
     private String name;
+    private List<User> users;
 
-    public ServeurDomaine(int port, String name) {
+    public ServeurDomaine(int port, String name, List<User> users) {
         this.port = port;
         this.name = name;
+        this.users = users;
 
         try {
             serverDomaineSocket = new ServerSocket(port);
@@ -34,7 +37,7 @@ public class ServeurDomaine extends Observable implements Observer {
                     Socket client = serverDomaineSocket.accept();
 
                     System.out.println("[ServeurDomaine:" + port + "] Connexion client reçue !");
-                    Communication communication = new Communication(client);
+                    Communication communication = new Communication(client, this.users);
                     communication.addObserver(ServeurDomaine.this);
                     new Thread(communication).start();
                 } catch (IOException e) {

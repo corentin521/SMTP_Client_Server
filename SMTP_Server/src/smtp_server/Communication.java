@@ -1,5 +1,7 @@
 package smtp_server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -38,10 +40,12 @@ public class Communication extends Observable implements Runnable {
 
     private List<String> validRecipients;
     private List<String> mailData;
+    private List<User> users;
 
-    public Communication(Socket socket) {
+    public Communication(Socket socket, List<User> users) {
         this.socket = socket;
         this.isRunning = true;
+        this.users = users;
         currentCommand = Command.NONE;
         validRecipients = new ArrayList<>();
         mailData = new ArrayList<>();
@@ -222,7 +226,15 @@ public class Communication extends Observable implements Runnable {
 
     private boolean recipientIsValid(String recipient)
     {
-        return true;
+        for(User user : this.users){
+            if(user.getName().equals(recipient))
+                return true;
+        }
+
+        setChanged();
+        notifyObservers("Utilisateur inconnu : " + recipient);
+
+        return false;
     }
 
     private void sendMessage(String message) throws IOException {

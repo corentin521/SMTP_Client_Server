@@ -44,10 +44,6 @@ public class ClientMain extends Application implements Observer {
 
     @Override
     public void start(Stage primaryStage) {
-//        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-//        primaryStage.setTitle("Hello World");
-//        primaryStage.setScene(new Scene(root, 300, 275));
-//        primaryStage.show();
         this.primaryStage = primaryStage;
         initUserInterface();
     }
@@ -121,6 +117,7 @@ public class ClientMain extends Application implements Observer {
             userName = userNameTextField.getText();
 
             if (portToConnect != 0) {
+//                client = new Client("134.214.117.178", portToConnect);
                 client = new Client("localhost", portToConnect);
                 client.addObserver(ClientMain.this);
                 clientThread = new Thread(client);
@@ -155,7 +152,7 @@ public class ClientMain extends Application implements Observer {
         Label toLabel = new Label("A :");
         mailboxGrid.add(toLabel, 1, 3);
         toTextField = new TextField();
-        toTextField.setText("test@free.fr;dupont@gmail.com");
+        toTextField.setText("louise.blanc@gmail.com;fabienne.neufville@free.fr;martine.turcotte@gmail.com;victor.chauvin@hotmail.fr");
         mailboxGrid.add(toTextField, 2, 3, 45, 1);
         
         Label subjectLabel = new Label("Objet :");

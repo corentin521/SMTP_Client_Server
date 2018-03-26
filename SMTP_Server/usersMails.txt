@@ -1,32 +1,17 @@
+
 From: arthur2.dupont@free.fr
-To: test@free.fr
+To: fabienne.neufville@free.fr
 Subject: Test subject
-Date: Mon Mar 26 08:58:58 CEST 2018
-Message-ID: LxSrNlwkktFzrRDQ88R6
+Date: Mon Mar 26 09:41:55 CEST 2018
+Message-ID: fjK3SdPGOZVOqn6I4yVQ
 Test content
 .
 
 From: arthur2.dupont@free.fr
-To: dupont@gmail.com
+To: martine.turcotte@gmail.com
 Subject: Test subject
-Date: Mon Mar 26 08:58:58 CEST 2018
-Message-ID: 3ggA0TIQ9iLdfGRwnOuT
-Test content
-.
-
-From: arthur2.dupont@free.fr
-To: test@free.fr
-Subject: Test subject
-Date: Mon Mar 26 08:59:46 CEST 2018
-Message-ID: TuVNoIEtKrqciE4WqXkI
-Test content
-.
-
-From: arthur2.dupont@free.fr
-To: dupont@gmail.com
-Subject: Test subject
-Date: Mon Mar 26 08:59:46 CEST 2018
-Message-ID: 8B8uCd6VUp11nA3UcaYM
+Date: Mon Mar 26 09:41:55 CEST 2018
+Message-ID: HNtcs1cbHVzSqor39FYe
 Test content
 .
 
