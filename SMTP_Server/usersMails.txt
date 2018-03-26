@@ -1,17 +1,32 @@
-
-From: arthur2.dupont@free.fr
-To: fabienne.neufville@free.fr
+From: grgerget@free.fr
+To: louise.blanc@gmail.com
 Subject: Test subject
-Date: Mon Mar 26 09:41:55 CEST 2018
-Message-ID: fjK3SdPGOZVOqn6I4yVQ
+Date: Mon Mar 26 09:55:16 CEST 2018
+Message-ID: 3CxAiMUt6DtCDFTASED8
 Test content
 .
 
-From: arthur2.dupont@free.fr
+From: grgerget@free.fr
+To: fabienne.neufville@free.fr
+Subject: Test subject
+Date: Mon Mar 26 09:55:16 CEST 2018
+Message-ID: jm3tsyh8vxXShZE7oGyZ
+Test content
+.
+
+From: grgerget@free.fr
 To: martine.turcotte@gmail.com
 Subject: Test subject
-Date: Mon Mar 26 09:41:55 CEST 2018
-Message-ID: HNtcs1cbHVzSqor39FYe
+Date: Mon Mar 26 09:55:16 CEST 2018
+Message-ID: 3CxAiMUt6DtCDFTASED8
+Test content
+.
+
+From: grgerget@free.fr
+To: arthur2.dupont@free.fr
+Subject: Test subject
+Date: Mon Mar 26 09:55:16 CEST 2018
+Message-ID: jm3tsyh8vxXShZE7oGyZ
 Test content
 .
 
